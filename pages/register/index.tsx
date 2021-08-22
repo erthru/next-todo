@@ -2,8 +2,8 @@ import { Box, Flex, Text } from "@chakra-ui/layout";
 import { useRouter } from "next/dist/client/router";
 import { useEffect, useState } from "react";
 import CRegisterForm, { RegisterFormValue } from "../../components/register-form";
-import api from "../../helpers/api";
-import { API_URL, APP_TITLE } from "../../helpers/environments";
+import api from "../../configs/api";
+import { APP_TITLE } from "../../helpers/environments";
 import * as session from "../../helpers/session";
 import Head from "next/head";
 
@@ -26,7 +26,7 @@ const PLogin = () => {
             else {
                 setIsLoading(true);
 
-                await api().post(`${API_URL}users`, {
+                await api().post("/api/users", {
                     firstName: value.firstName,
                     lastName: value.lastName,
                     username: value.username,

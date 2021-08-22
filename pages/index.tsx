@@ -1,11 +1,11 @@
 import LHome from "../layout/home";
 import Head from "next/head";
-import { API_URL, APP_TITLE } from "../helpers/environments";
+import { APP_TITLE } from "../helpers/environments";
 import CActivityForm, { ActivityFormValue } from "../components/activity-form";
 import { useEffect, useState } from "react";
 import { Box, Flex, Text } from "@chakra-ui/layout";
 import CActivities from "../components/activities";
-import api from "../helpers/api";
+import api from "../configs/api";
 import { LeanDocument } from "mongoose";
 import activity, { IActivity } from "../models/activity";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,7 +36,7 @@ const PHome = () => {
         try {
             setIsLoading(true);
 
-            await api().post(`${API_URL}users/me/activities`, {
+            await api().post("/api/users/me/activities", {
                 activity: value.activity,
                 schedule: value.schedule,
             });
@@ -52,7 +52,7 @@ const PHome = () => {
     const _delete = async () => {
         try {
             setIsLoading(true);
-            await api().delete(`${API_URL}users/me/activities/${idToDelete}`);
+            await api().delete(`/api/users/me/activities/${idToDelete}`);
             setIsLoading(false);
             dispatch(setIdToDelete(""));
             getActivities();
@@ -64,7 +64,7 @@ const PHome = () => {
     const getActivities = async () => {
         try {
             setIsLoading(true);
-            const res = await api().get(`${API_URL}users/me/activities`);
+            const res = await api().get("/api/users/me/activities");
             setActivities(res.data.activities);
             setIsLoading(false);
         } catch (e: any) {

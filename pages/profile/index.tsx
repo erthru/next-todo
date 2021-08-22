@@ -3,8 +3,8 @@ import Head from "next/head";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import CProfileForm, { ProfileFormValue } from "../../components/profile-form";
-import api from "../../helpers/api";
-import { API_URL, APP_TITLE } from "../../helpers/environments";
+import api from "../../configs/api";
+import { APP_TITLE } from "../../helpers/environments";
 import LHome from "../../layout/home";
 import { Store } from "../../store";
 
@@ -17,7 +17,7 @@ const PProfile = () => {
         try {
             setIsLoading(true);
 
-            await api().put(`${API_URL}users/me`, {
+            await api().put("/api/users/me", {
                 firstName: value.firstName,
                 lastName: value.lastName,
             });

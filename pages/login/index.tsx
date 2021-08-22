@@ -2,8 +2,8 @@ import { Box, Flex, Text } from "@chakra-ui/layout";
 import { useRouter } from "next/dist/client/router";
 import { useEffect, useState } from "react";
 import CLoginForm, { LoginFormValue } from "../../components/login-form";
-import api from "../../helpers/api";
-import { API_URL, APP_TITLE } from "../../helpers/environments";
+import api from "../../configs/api";
+import { APP_TITLE } from "../../helpers/environments";
 import * as session from "../../helpers/session";
 import Head from "next/head";
 
@@ -21,7 +21,7 @@ const PLogin = () => {
             setIsLoading(true);
             setIsLoginFailed(false);
 
-            const res = await api().post(`${API_URL}auths/authenticate`, {
+            const res = await api().post("/api/auths/authenticate", {
                 username: value.username,
                 password: value.password,
             });

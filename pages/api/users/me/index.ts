@@ -1,60 +1,44 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import db from "../../../../helpers/db";
-import { LOADED, ROUTE_NOT_FOUND, UNAUTHENTICATED, UPDATED } from "../../../../helpers/constants";
-import { verifyToken } from "../../../../helpers/verify-token";
+import db from "../../../../configs/db";
+import { LOADED, UPDATED } from "../../../../helpers/constants";
 import user, { UserDocument } from "../../../../models/user";
+import nc from "next-connect";
+import { verifyToken } from "../../../../middlewares/verify-token";
 
-const usersMe = async (req: NextApiRequest, res: NextApiResponse) => {
-    switch (req.method) {
-        case "GET":
-            try {
-                await db();
-                const tokenVerified = verifyToken(req.headers.authorization?.split(" ")[1] ?? "");
+const route = nc()
+    .get(verifyToken, async (req: NextApiRequest, res: NextApiResponse) => {
+        try {
+            await db();
+            const _user = await user.findOne({ [UserDocument.authId]: req.tokenVerified.id!! });
 
-                if (tokenVerified.isVerified) {
-                    const _user = await user.findOne({ [UserDocument.authId]: tokenVerified.id!! });
+            res.status(200).json({
+                message: LOADED,
+                user: _user,
+            });
+        } catch (e: any) {
+            res.status(500).json({ message: e.message });
+        }
+    })
+    .put(verifyToken, async (req: NextApiRequest, res: NextApiResponse) => {
+        try {
+            await db();
 
-                    res.status(200).json({
-                        message: LOADED,
-                        user: _user,
-                    });
-                } else res.status(401).json({ message: UNAUTHENTICATED });
-            } catch (e: any) {
-                res.status(500).json({ message: e.message });
-            }
+            const _user = await user.findOneAndUpdate(
+                { [UserDocument.authId]: req.tokenVerified.id!! },
+                {
+                    [UserDocument.firstName]: req.body.firstName,
+                    [UserDocument.lastName]: req.body.lastName,
+                },
+                { new: true }
+            );
 
-            break;
+            res.status(200).json({
+                message: UPDATED,
+                user: _user,
+            });
+        } catch (e: any) {
+            res.status(500).json({ message: e.message });
+        }
+    });
 
-        case "PUT":
-            try {
-                await db();
-                const tokenVerified = verifyToken(req.headers.authorization?.split(" ")[1] ?? "");
-
-                if (tokenVerified.isVerified) {
-                    const _user = await user.findOneAndUpdate(
-                        { [UserDocument.authId]: tokenVerified.id!! },
-                        {
-                            [UserDocument.firstName]: req.body.firstName,
-                            [UserDocument.lastName]: req.body.lastName,
-                        },
-                        { new: true }
-                    );
-
-                    res.status(200).json({
-                        message: UPDATED,
-                        user: _user,
-                    });
-                } else res.status(401).json({ message: UNAUTHENTICATED });
-            } catch (e: any) {
-                res.status(500).json({ message: e.message });
-            }
-
-            break;
-
-        default:
-            res.status(404).json({ message: ROUTE_NOT_FOUND });
-            break;
-    }
-};
-
-export default usersMe;
+export default route;

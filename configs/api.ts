@@ -1,10 +1,8 @@
 import axios, { AxiosInstance } from "axios";
-import { API_URL } from "./environments";
-import * as session from "./session";
+import * as session from "../helpers/session";
 
 const api = (): AxiosInstance => {
     const instance = axios.create({
-        baseURL: API_URL,
         timeout: 5000,
         headers: {
             Authorization: `Bearer ${session.get().token}`,
@@ -14,16 +12,10 @@ const api = (): AxiosInstance => {
     instance.interceptors.response.use(
         (response) => response,
         (error) => {
-            const originalRequest = error.config;
-
-            if (
-                error.response.status === 401 &&
-                originalRequest.url !== `${API_URL}auths/authenticate/refresh` &&
-                originalRequest.url !== `${API_URL}auths/authenticate`
-            ) {
+            if (error.response.status === 401) {
                 instance
                     .post(
-                        `${API_URL}auths/authenticate/refresh`,
+                        "/api/auths/authenticate/refresh",
                         {},
                         {
                             headers: {
@@ -33,10 +25,11 @@ const api = (): AxiosInstance => {
                     )
                     .then((res) => {
                         session.create(res.data.token, res.data.refreshToken);
+                    })
+                    .catch((e) => {
+                        session.clear();
+                        window.location.href = "/login";
                     });
-            } else if (error.response.status === 401 && originalRequest.url === `${API_URL}auths/authenticate/refresh`) {
-                session.clear();
-                window.location.href = "/login";
             }
 
             return Promise.reject(error);

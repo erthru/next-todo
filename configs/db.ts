@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_URL } from "./environments";
+import { DB_URL } from "../helpers/environments";
 
 const db = async () => {
     if (mongoose.connection.readyState >= 1) return;
